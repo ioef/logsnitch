@@ -80,6 +80,7 @@ print "===================================================================="
 for record in failedLogins:
     print "user: %(user)-20s from host: %(ip)s" %record
 print "===================================================================="
+print "\n"
 
 #nginx Hacking Attempts
 print "The following intruders identified bruteforcing your Nginx"
