@@ -30,7 +30,8 @@ if not os.geteuid() == 0:
 authfailure = []
 failedLogins = []
 
-with open(logpath+ '/auth.log', 'r') as logfile1:
+authlog = logpath + '/auth.log'
+with open(authlog, 'r') as logfile1:
     authfile = logfile1.read().splitlines()
 
     for line in authfile:
