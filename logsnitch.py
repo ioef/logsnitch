@@ -49,15 +49,23 @@ with open(logpath+ '/auth.log', 'r') as logfile1:
                     host   = hostMo.group(2)
 
                 if user and host:
-                    authfailure.append({'user':user, 'host':host})
+                    linesplit = line.split()
+                    #extract the date from the line
+                    date=[]
+                    for i in range(2,-1,-1):
+                        date.append(linesplit[i])
+
+                    date = ' '.join(date)
+                    authfailure.append({'date':date, 'user':user, 'host':host})
            
 
              if "pam_unix" in line:
                  pass
 
         if "Failed password for invalid" in line:
-            res = line.split(' ')
-            failedLogins.append({'user':res[11], 'ip':res[13]})
+            res = line.split()
+            date = ' '.join(res[2::-1])
+            failedLogins.append({'date':date,'user':res[10], 'ip':res[12]})
             
 
 ipList = []
@@ -70,8 +78,12 @@ if os.path.isdir(nginxdir):
             for line in nginxaccess:
                 #The following works if you don't provided this kind of interface towards the NET
                 if "admin" or "mysql" or "Admin" or "phpMyAdmin2" in line:
-                    ipList.append(line.split(' ')[0])
-
+                    #The page is not found but the malevolent persistentrly performs requests
+                    # to admin pages
+                    if "404" in line:
+                        #extract ip 
+                        ipList.append(line.split(' ')[0])
+                       
 #preserve only unique IPs. This is done by converting the list to a set and back to a list
 ipList = list(set(ipList))
             
@@ -79,23 +91,23 @@ ipList = list(set(ipList))
 #Failed ssh Authentication Attempts in your sshd
 print "\n"
 print "Authentication failure in known ssh users"
-print "===================================================================="
+print "=============================================================================="
 for record in authfailure:
-    print "user: %(user)-20s from host: %(host)s" %record
-print "===================================================================="
+    print "Date:%(date)-15s User:%(user)-12s from Host:%(host)s" %record
+print "=============================================================================="
 print "\n"
 
 #Failed ssh login attempts from invalid users
 print "Failed ssh login attempts from invalid users"
-print "===================================================================="
+print "=============================================================================="
 for record in failedLogins:
-    print "user: %(user)-20s from host: %(ip)s" %record
-print "===================================================================="
+    print "Date:%(date)-15s User:%(user)-12s from Host:%(ip)s" %record
+print "=============================================================================="
 print "\n"
 
 #nginx Hacking Attempts
 print "The following intruders identified bruteforcing your Nginx"
-print "===================================================================="
+print "=============================================================================="
 for ip in ipList:
     print ip
-print "===================================================================="
+print "=============================================================================="
