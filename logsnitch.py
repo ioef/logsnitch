@@ -20,8 +20,6 @@ logpath='/var/log'
 #regex patterns
 authPattern1 = re.compile(r'(user)=([a-zA-Z[0-9]+$)')
 authPattern2 = re.compile(r'(rhost)=([0-9A-Za-z.]*)')
-authPattern3 = re.compile(r'(Failed password).*')
-
 
 if not os.geteuid() == 0:
     sys.exit('Become root and try again!\nExiting...')
