@@ -4,9 +4,9 @@ Currently shows the user and host for authentication failures in known ssh users
 
 # Instructions
  * Issue chmod +x logsnitch.py
- * Execute the logsnitch.py file as sudo. sudo ./logsnitch.py
+ * Execute the logsnitch.py sudo env GMAIL_USER='xxxxxx@gmail.com' GMAIL_PWD='xxxxxxx' DATA_RECIPIENT='xxxxxx@gmail.com' ./logsnitch.py 
 
- 
-# TO DO
-Will be enhanced with the smtplib in order to support automated mail sending with this info after it's execution through a cron job.
-
+Optionally create a cron job
+```
+00,30 * * * * env GMAIL_USER='xxxxxx@gmail.com' GMAIL_PWD='xxxxxxx' DATA_RECIPIENT='xxxxxx@gmail.com' /home/user/logsnitch.py  > /dev/null 2>&1
+```
