@@ -13,6 +13,10 @@
 import os
 import sys
 import re
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+import time 
 
 #general variables
 logpath='/var/log'
@@ -20,6 +24,34 @@ logpath='/var/log'
 #regex patterns
 authPattern1 = re.compile(r'(user)=([a-zA-Z[0-9]+$)')
 authPattern2 = re.compile(r'(rhost)=([0-9A-Za-z.]*)')
+authPattern3 = re.compile(r'(Failed password).*')
+
+
+# gmail username
+USER = os.environ.get('GMAIL_USER')
+# gmail password
+PWD = os.environ.get('GMAIL_PWD')
+# sender address
+FROM = 'logsnitch@gmail.com'
+# comma separated list of recipients
+TO = os.environ.get('DATA_RECIPIENT')
+
+
+def sendmail(data):
+    body = data
+
+    body = 'Hi Admin!\n' + body
+    message = MIMEMultipart()
+    message['From'] = FROM
+    message['To'] = TO
+    message['Subject'] = "Server logs Report:" + time.strftime('%d/%m/%Y-%H:%m')
+    message.attach(MIMEText(body, 'plain'))
+    
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(USER, PWD)
+    server.sendmail(FROM, TO, message.as_string())
+    server.quit()
 
 if not os.geteuid() == 0:
     sys.exit('Become root and try again!\nExiting...')
@@ -28,8 +60,7 @@ if not os.geteuid() == 0:
 authfailure = []
 failedLogins = []
 
-authlog = logpath + '/auth.log'
-with open(authlog, 'r') as logfile1:
+with open(logpath+ '/auth.log', 'r') as logfile1:
     authfile = logfile1.read().splitlines()
 
     for line in authfile:
@@ -85,28 +116,57 @@ if os.path.isdir(nginxdir):
                        
 #preserve only unique IPs. This is done by converting the list to a set and back to a list
 ipList = list(set(ipList))
-            
 
-#Failed ssh Authentication Attempts in your sshd
-print "\n"
-print "Authentication failure in known ssh users"
-print "=============================================================================="
-for record in authfailure:
-    print "Date:%(date)-15s User:%(user)-12s from Host:%(host)s" %record
-print "=============================================================================="
-print "\n"
+data =""
+if True:
+    #Failed ssh Authentication Attempts in your sshd
+    data += "\n"
+    data += "Authentication failure in known ssh users\n"
+    data += "==============================================================================\n"
+    for record in authfailure:
+        data += "Date:%(date)-15s User:%(user)-12s from Host:%(host)s\n" %record
+    data += "==============================================================================\n"
+    data +="\n"
+    
+    #Failed ssh login attempts from invalid users
+    data += "Failed ssh login attempts from invalid users\n"
+    data += "==============================================================================\n"
+    for record in failedLogins:
+        data += "Date:%(date)-15s User:%(user)-12s from Host:%(ip)s\n" %record
+    data += "==============================================================================\n"
+    data += "\n"
 
-#Failed ssh login attempts from invalid users
-print "Failed ssh login attempts from invalid users"
-print "=============================================================================="
-for record in failedLogins:
-    print "Date:%(date)-15s User:%(user)-12s from Host:%(ip)s" %record
-print "=============================================================================="
-print "\n"
+    #nginx Hacking Attempts
+    data += "The following intruders identified bruteforcing your Nginx\n"
+    data += "==============================================================================\n"
+    for ip in ipList:
+        data += ip +'\n'
+    data += "==============================================================================\n"
 
-#nginx Hacking Attempts
-print "The following intruders identified bruteforcing your Nginx"
-print "=============================================================================="
-for ip in ipList:
-    print ip
-print "=============================================================================="
+try:
+    with open('tmp1.tmp', 'r') as tempfile:
+        fileContents = tempfile.read()
+        if fileContents == data:
+            print 'No changes detected in the Server logs!'
+        else:
+            #write the new data to the file
+            with open('tmp1.tmp', 'w') as tmpfile2:
+                tmpfile2.write(data)
+
+                #send email only if a change was detected 
+                sendmail(data)
+
+except IOError, err:
+    #helful error messages
+    #print err
+    #print err.errno
+    #print err.strerror
+    #print err.filename
+
+    # if the tmp1.tmp not found create it
+    # this happens if it was deleted or if the program
+    # executed for the first time
+    if err.errno == 2:
+        with open('tmp1.tmp', 'w') as tmpfile:
+            tmpfile.write(data)
+            sendmail(data)
