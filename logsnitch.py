@@ -118,30 +118,30 @@ if os.path.isdir(nginxdir):
 ipList = list(set(ipList))
 
 data =""
-if True:
-    #Failed ssh Authentication Attempts in your sshd
-    data += "\n"
-    data += "Authentication failure in known ssh users\n"
-    data += "==============================================================================\n"
-    for record in authfailure:
-        data += "Date:%(date)-15s User:%(user)-12s from Host:%(host)s\n" %record
-    data += "==============================================================================\n"
-    data +="\n"
-    
-    #Failed ssh login attempts from invalid users
-    data += "Failed ssh login attempts from invalid users\n"
-    data += "==============================================================================\n"
-    for record in failedLogins:
-        data += "Date:%(date)-15s User:%(user)-12s from Host:%(ip)s\n" %record
-    data += "==============================================================================\n"
-    data += "\n"
 
-    #nginx Hacking Attempts
-    data += "The following intruders identified bruteforcing your Nginx\n"
-    data += "==============================================================================\n"
-    for ip in ipList:
-        data += ip +'\n'
-    data += "==============================================================================\n"
+#Failed ssh Authentication Attempts in your sshd
+data += "\n"
+data += "Authentication failure in known ssh users\n"
+data += "==============================================================================\n"
+for record in authfailure:
+    data += "Date:%(date)-15s User:%(user)-12s from Host:%(host)s\n" %record
+data += "==============================================================================\n"
+data +="\n"
+    
+#Failed ssh login attempts from invalid users
+data += "Failed ssh login attempts from invalid users\n"
+data += "==============================================================================\n"
+for record in failedLogins:
+    data += "Date:%(date)-15s User:%(user)-12s from Host:%(ip)s\n" %record
+data += "==============================================================================\n"
+data += "\n"
+
+#nginx Hacking Attempts
+data += "The following intruders identified bruteforcing your Nginx\n"
+data += "==============================================================================\n"
+for ip in ipList:
+    data += ip +'\n'
+data += "==============================================================================\n"
 
 try:
     with open('tmp1.tmp', 'r') as tempfile:
