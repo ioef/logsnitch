@@ -44,7 +44,7 @@ def sendmail(data):
     message = MIMEMultipart()
     message['From'] = FROM
     message['To'] = TO
-    message['Subject'] = "Server logs Report:" + time.strftime('%d/%m/%Y-%H:%m')
+    message['Subject'] = "Server logs Report: " + time.strftime('%d/%m/%Y-%H:%m')
     message.attach(MIMEText(body, 'plain'))
     
     server = smtplib.SMTP('smtp.gmail.com:587')
