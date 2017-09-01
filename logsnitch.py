@@ -48,6 +48,7 @@ def sendmail(data):
     message.attach(MIMEText(body, 'plain'))
     
     server = smtplib.SMTP('smtp.gmail.com:587')
+    server.ehlo()
     server.starttls()
     server.login(USER, PWD)
     server.sendmail(FROM, TO, message.as_string())
