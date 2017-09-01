@@ -32,7 +32,7 @@ USER = os.environ.get('GMAIL_USER')
 # gmail password
 PWD = os.environ.get('GMAIL_PWD')
 # sender address
-FROM = 'logsnitch@gmail.com'
+FROM = USER + '@gmail.com'
 # comma separated list of recipients
 TO = os.environ.get('DATA_RECIPIENT')
 
@@ -40,7 +40,7 @@ TO = os.environ.get('DATA_RECIPIENT')
 def sendmail(data):
     body = data
 
-    body = 'Hi Admin!\n' + body
+    body = 'Hi!\n Below you may find the current report:\n' + body
     message = MIMEMultipart()
     message['From'] = FROM
     message['To'] = TO
